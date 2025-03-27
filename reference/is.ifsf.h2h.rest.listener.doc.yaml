@@ -147,10 +147,197 @@ paths:
       description: Create a new user.
 components:
   schemas:
-    User:
-      title: User
+    Card:
+      title: Card
+      x-stoplight:
+        id: z4mxoz7ptpwiv
       type: object
-      description: ''
+      properties:
+        cardISOType:
+          type: string
+          x-stoplight:
+            id: 45ooj00snwhs2
+          description: |
+            This is highly dependent on the rules set by the Card Brands. Currently the first 6 digits can be displayed.
+        context:
+          type: string
+          x-stoplight:
+            id: ezo90i3szram7
+          enum:
+            - token
+            - MSR
+            - ICC
+            - CNP
+            - NFC
+          description: Context identifies the different use cases related to cards.
+        encryptedSensitiveCardDetailsReq:
+          type: string
+          x-stoplight:
+            id: yy89joe66vms1
+          description: |-
+            The JWE data type used to transmit a key. Use base 58 encoding.
+            The JWE content is defined in the official documentation under the voice POST/sensitiveCardDetailsReq
+
+            An example is:
+
+            {
+              "context": "MSR",
+              "track2": "stringst",
+              "expiry": {
+                "month": 1,
+                "year": 1500
+              },
+              "PAN": "string"
+            }
+        issuerNumber:
+          type: string
+          x-stoplight:
+            id: xkskvimjkuiyj
+          description: |
+            Card Issue Number is the card issuer number (also known as card sequence number) if available and applicable to the card type.
+        maskedPAN:
+          type: string
+          x-stoplight:
+            id: sfje06z199q4k
+          description: |
+            Masked Primary Account Number is not present in requests
+        maskingType:
+          type: string
+          x-stoplight:
+            id: 0net2beno46ye
+          description: |
+            Masking type consistent with DE-127-1.34. Specified which digits are masked (bitmap: 0 clear - 1 masked)
+        pinData:
+          type: string
+          x-stoplight:
+            id: mf6yrjk23q0j2
+      required:
+        - cardISOType
+        - context
+        - encryptedSensitiveCardDetailsReq
+        - issuerNumber
+        - maskedPAN
+        - maskingType
+        - pinData
+    Merchant:
+      title: Merchant
+      x-stoplight:
+        id: n80pa5afmaqp3
+      type: object
+      properties:
+        country:
+          type: string
+          x-stoplight:
+            id: 75j280syc18oq
+          description: |
+            ISO-3166 / UN/ECE REC 09 Codes
+        categoryNumber:
+          type: string
+          x-stoplight:
+            id: ljcozl76c4hxm
+          description: |
+            category number is the ISO merchant category code appropriate for the merchant
+        merchantID:
+          type: string
+          x-stoplight:
+            id: kes68kpxmegob
+          description: |-
+            40 character description.
+
+            The only mandatory field, used to identify the fuel station
+        name:
+          type: string
+          x-stoplight:
+            id: ve3cun819j3b9
+          description: |
+            40 character description.
+        networkID:
+          type: string
+          x-stoplight:
+            id: 27wh3b1dxmbur
+          description: |
+            16 character description.
+      required:
+        - merchantID
+    PaymentContext:
+      title: PaymentContext
+      x-stoplight:
+        id: 30048z049p2h2
+      type: object
+      properties:
+        context:
+          type: string
+          x-stoplight:
+            id: j7sazmhwingk5
+          enum:
+            - token
+            - ICC
+            - MSR
+            - NFC
+            - CNP
+          description: Context identifies the different use cases related to cards.
+        cardReadMethod:
+          type: string
+          x-stoplight:
+            id: or8d4t5ur0bw9
+          enum:
+            - MAGSTRIPE
+            - CONTACLESS_MAGSTRIPE
+          description: |
+            Card Read Method indicates how the card details were read at the POI
+        cardholderAuthEntity:
+          type: string
+          x-stoplight:
+            id: fsqe3vfhuaeam
+          enum:
+            - AUTHORISER
+            - TERMINAL
+            - MERCHANT
+          description: |
+            Cardholder Authentication Entity indicates the party who has authenticated the cardholder. Omitted if cardholder authentication has not been performed at the time the message is created
+        cardholderAuthMethod:
+          type: string
+          x-stoplight:
+            id: al64l582ddtxg
+          enum:
+            - PIN_OFFLINE_CLEAR
+            - PIN_ONLINE
+            - SIGNATURE
+          description: |
+            Cardholder Authentication Method indicates how the method by which cardholder has been authenticated, if known
+        cardholderPresent:
+          type: string
+          x-stoplight:
+            id: brz6dvgobc9ks
+          description: |
+            Cardholder Present if the cardholder is present at the POI at the time of transaction
+          enum:
+            - PRESENT
+        fallback:
+          type: string
+          x-stoplight:
+            id: rq3tlemfszdem
+          enum:
+            - 'yes'
+            - 'no'
+        fleetEntryMethod:
+          type: string
+          x-stoplight:
+            id: so9pddfgbgy7j
+          description: |
+            Fleet Entry Method indicates how fleet data was entered at the POI, if known and applicable
+      required:
+        - context
+        - cardReadMethod
+        - cardholderAuthEntity
+        - cardholderAuthMethod
+        - cardholderPresent
+        - fallback
+    PaymentRequest:
+      title: PaymentRequest
+      x-stoplight:
+        id: d9a407640a5c3
+      type: object
       x-examples:
         Alice Smith:
           id: 142
@@ -161,30 +348,252 @@ components:
           emailVerified: true
           signUpDate: '2019-08-24'
       properties:
-        id:
-          type: integer
-          description: Unique identifier for the given user.
-        firstName:
+        card:
+          $ref: '#/components/schemas/Card'
+        paymentContext:
+          $ref: '#/components/schemas/PaymentContext'
+        encryptedCustomerData:
           type: string
-        lastName:
+          x-stoplight:
+            id: 8go5c6tfpbrty
+        merchant:
+          $ref: '#/components/schemas/Merchant'
+        POI:
+          $ref: '#/components/schemas/POI'
+        saleContext:
           type: string
-        email:
-          type: string
-          format: email
-        dateOfBirth:
-          type: string
-          format: date
-          example: '1997-10-31'
-        emailVerified:
-          type: boolean
-          description: Set to true if the user's email has been verified.
-        createDate:
-          type: string
-          format: date
-          description: The date that the user was created.
+          x-stoplight:
+            id: cwwdhkygntk0w
+          description: |
+            16 character description.
       required:
-        - id
-        - firstName
-        - lastName
-        - email
-        - emailVerified
+        - card
+        - paymentContext
+        - encryptedCustomerData
+        - merchant
+        - POI
+        - saleContext
+    POI:
+      title: POI
+      x-stoplight:
+        id: faud6p8k2wh36
+      type: object
+      properties:
+        siteID:
+          type: string
+          x-stoplight:
+            id: li945ajve5nd1
+          description: |
+            40 character ID
+        address:
+          type: string
+          x-stoplight:
+            id: q0sozvamdjkh9
+          description: |
+            Point of interaction address
+        POIType:
+          type: string
+          x-stoplight:
+            id: 0y4e3l5r2uzth
+          description: |
+            Types of points of interaction
+        POIID:
+          type: string
+          x-stoplight:
+            id: saywfxyq9c11e
+          description: 'The only mandatory field, it''s the terminal ID'
+        language:
+          type: string
+          x-stoplight:
+            id: 63jls41xxfni0
+          description: 'ISO 639 language code, not used'
+        readerCapabilities:
+          type: object
+          x-stoplight:
+            id: 53w7qet7i303x
+          description: 'This is the schema used to define the capabilities, not used'
+          properties:
+            cardCapture:
+              type: string
+              x-stoplight:
+                id: w8nl547sq4f8y
+              enum:
+                - 'yes'
+                - 'no'
+            cardReading:
+              type: string
+              x-stoplight:
+                id: py89xtnbkfbpq
+              description: |
+                Card Reading Capability indicates the means of card data entry to the POI. Omitted if unknown
+              enum:
+                - BARCODE
+                - CONTACTLESS_ENV
+                - CONTACTLESS_MAGSTRIPE
+                - EMV
+                - KEY_ENTRY
+                - MAGSTRIPE
+                - NONE
+            cardWriting:
+              type: string
+              x-stoplight:
+                id: 471qtxfw07v7e
+              description: |
+                Card Writing Capability indicates the means of card data entry to the POI. Omitted if unknown
+              enum:
+                - EMV
+                - MAGSTRIPE
+                - NONE
+            cardholderVerification:
+              type: string
+              x-stoplight:
+                id: x1y27zbysx4pq
+              enum:
+                - CDCVM
+                - NO_CVM
+                - PIN_OFFLINE_CLEAR
+                - PIN_OFFLINE_ENCRYPTED
+                - PIN_ONLINE
+                - SIGNATURE
+              description: |
+                Card Verification Capability indicates the means of cardholder verification at the POI. Omitted if unknown
+            environment:
+              type: string
+              x-stoplight:
+                id: ztkqhra5m8gyb
+              enum:
+                - MERCHANT_ATTENDED
+                - MERCHANT_UNATTENDED
+                - CARDHOLDER
+              description: |
+                Environment indicates the characteristics of the POI. Omitted if unknown
+            pinLength:
+              type: integer
+              x-stoplight:
+                id: xqdsqqomyravc
+              description: |
+                PIN Length indicates the maximum length of PIN supported by the card terminal. Omit this field entirely if the PIN entry length is unknown of the POI does not support PIN entry at all
+            cashierDisplayCapabilities:
+              type: integer
+              x-stoplight:
+                id: eu7lxqe68mb17
+            cardholderDisplayCapabilities:
+              type: integer
+              x-stoplight:
+                id: h5d195bww2h0r
+            cashierPrintCapabilities:
+              type: integer
+              x-stoplight:
+                id: 4fepwbbjllv7w
+            cardholderPrintCapabilities:
+              type: integer
+              x-stoplight:
+                id: 86wu35n5lfrey
+        POITraceNumber:
+          type: string
+          x-stoplight:
+            id: ll2ux3lexve8h
+      required:
+        - POIID
+    Transaction:
+      title: Transaction
+      x-stoplight:
+        id: d1spy52xf60vf
+      type: object
+      properties:
+        currency:
+          type: string
+          x-stoplight:
+            id: hv6ul2r6rgz3s
+          description: |
+            ISO-4217 / UN/ECE REC 09 Codes
+        transactionAmount:
+          type: string
+          x-stoplight:
+            id: xhpyajccg3wxy
+        batchNumber:
+          type: string
+          x-stoplight:
+            id: z92q3hhm9jqd9
+        dateTimeLocal:
+          type: string
+          x-stoplight:
+            id: prih5emzqnxbv
+        transactionLines:
+          type: array
+          x-stoplight:
+            id: 1bn9dyatj8dwy
+          items: {}
+        serviceLevel:
+          type: string
+          x-stoplight:
+            id: gxa9ga6gcvf5a
+        transctionID:
+          type: string
+          x-stoplight:
+            id: cktdlqj7hin6u
+        traceNumber:
+          type: integer
+          x-stoplight:
+            id: oet645xruuf3b
+      required:
+        - traceNumber
+    TransactionLine:
+      title: TransactionLine
+      x-stoplight:
+        id: jjeeikyfnulla
+      type: object
+      properties:
+        trxLineSequenceNumber:
+          type: string
+          x-stoplight:
+            id: 47isr5vh96h1e
+        productCode:
+          type: string
+          x-stoplight:
+            id: rsmzw5poies4n
+        productDescription:
+          type: string
+          x-stoplight:
+            id: afft60iqcy8xl
+        additionalProductDescription:
+          type: string
+          x-stoplight:
+            id: 5jh1k9bfnn0or
+        refillingPointID:
+          type: string
+          x-stoplight:
+            id: 4l8sk16xt3mpr
+        pumpLinked:
+          type: string
+          x-stoplight:
+            id: fb1vem75xs4lt
+        unitPrice:
+          type: number
+          x-stoplight:
+            id: zxl2ssyo3js64
+        salesQuantity:
+          type: object
+          x-stoplight:
+            id: u4q6t98bgttdp
+          properties:
+            value:
+              type: number
+              x-stoplight:
+                id: 3ata88uv6m1g0
+            uom:
+              type: string
+              x-stoplight:
+                id: 9jjn9k7rkcc13
+        salesAmount:
+          type: number
+          x-stoplight:
+            id: tnmxuvxl08cmb
+        taxCode:
+          type: string
+          x-stoplight:
+            id: p6xbe6ums5dgq
+        taxAmount:
+          type: number
+          x-stoplight:
+            id: dnh4wt4qg78zd
