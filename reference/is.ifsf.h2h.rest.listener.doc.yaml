@@ -33,7 +33,7 @@ paths:
             schema:
               type: object
               properties:
-                aaa:
+                '':
                   $ref: '#/components/schemas/PaymentRequest'
             examples: {}
         description: Post the necessary fields for the API to create a new user.
