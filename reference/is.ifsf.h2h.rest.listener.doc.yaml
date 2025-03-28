@@ -13,17 +13,20 @@ paths:
       summary: Send a Payment request
       operationId: post-user
       responses:
-        '200':
-          description: ''
+        '201':
+          description: Created
           content:
             application/json:
               schema:
-                type: string
-              examples: {}
-        '400':
-          description: Missing Required Information
-        '409':
-          description: Email Already Taken
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                  paymentRequestsResponse:
+                    $ref: '#/components/schemas/PaymentRequestsResponse'
+                required:
+                  - statusReturn
+                  - paymentRequestsResponse
       requestBody:
         content:
           application/json:
@@ -563,6 +566,112 @@ components:
         - unitPrice
         - salesQuantity
         - salesAmount
+    StatusReturn:
+      title: StatusReturn
+      x-stoplight:
+        id: vrer392o9b3nk
+      type: object
+      properties:
+        timestamp:
+          type: string
+          x-stoplight:
+            id: 1xvr5f6b8169z
+          format: date-time
+        result:
+          type: string
+          x-stoplight:
+            id: yjmtww7nusmvb
+          description: Fixed value "success"
+        error:
+          type: string
+          x-stoplight:
+            id: hfoox5ul16jq0
+          description: Fixed value "ERRCD_OK"
+        message:
+          type: string
+          x-stoplight:
+            id: wventropssrr4
+      required:
+        - timestamp
+        - result
+        - error
+    PaymentRequestsResponse:
+      title: PaymentRequestsResponse
+      x-stoplight:
+        id: k0yjyejt0wo7m
+      type: object
+      properties:
+        iccDataResponse:
+          type: string
+          x-stoplight:
+            id: g3uhfwdtido1b
+        allowedProducts:
+          type: array
+          x-stoplight:
+            id: itu2w3rob7tpr
+          items:
+            x-stoplight:
+              id: g92xf8vlpjn3n
+            type: object
+            properties:
+              productCode:
+                type: integer
+                x-stoplight:
+                  id: 6d4kr6pdvfn9e
+        originalAmount:
+          type: string
+          x-stoplight:
+            id: usawtsktm8w9c
+        transactionAmount:
+          type: string
+          x-stoplight:
+            id: lqg9pzga1d9pk
+        approvedLimit:
+          type: object
+          x-stoplight:
+            id: 7fvsg431n9aa9
+          properties:
+            quantity:
+              type: object
+              x-stoplight:
+                id: db92cfs2hzg3o
+              properties:
+                value:
+                  type: string
+                  x-stoplight:
+                    id: 7z4vxs5jekq04
+                uom:
+                  type: string
+                  x-stoplight:
+                    id: 3l51k8cf3yj4d
+            amount:
+              type: string
+              x-stoplight:
+                id: pkby1vzkwvlgh
+        authorizationCode:
+          type: string
+          x-stoplight:
+            id: g2nvgcphwbwsy
+        completionRequired:
+          type: string
+          x-stoplight:
+            id: ruskygrakl9x6
+        customerMessage:
+          type: string
+          x-stoplight:
+            id: ic1zmlx3uqslb
+        loyaltyRestriction:
+          type: string
+          x-stoplight:
+            id: c60mizpmeqnor
+        taxData:
+          type: string
+          x-stoplight:
+            id: 1s9s2ssctxhz9
+        transactionID:
+          type: string
+          x-stoplight:
+            id: laqa9tgl5ljo1
   securitySchemes:
     API Key - 1:
       type: oauth2
