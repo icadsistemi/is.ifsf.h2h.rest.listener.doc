@@ -3,97 +3,14 @@ x-stoplight:
   id: 2ebhzpp6a9rxu
 info:
   title: is.ifsf.h2h.rest.listener.doc
-  version: '1.0'
+  version: 0.0.1
+  description: ''
 servers:
   - url: 'http://localhost:3000'
 paths:
-  '/users/{userId}':
-    parameters:
-      - schema:
-          type: integer
-        name: userId
-        in: path
-        required: true
-        description: Id of an existing user.
-    get:
-      summary: Get User Info by User ID
-      tags: []
-      responses:
-        '200':
-          description: User Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Get User Alice Smith:
-                  value:
-                    id: 142
-                    firstName: Alice
-                    lastName: Smith
-                    email: alice.smith@gmail.com
-                    dateOfBirth: '1997-10-31'
-                    emailVerified: true
-                    signUpDate: '2019-08-24'
-        '404':
-          description: User Not Found
-      operationId: get-users-userId
-      description: Retrieve the information of the user with the matching user ID.
-    patch:
-      summary: Update User Information
-      operationId: patch-users-userId
-      responses:
-        '200':
-          description: User Updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                Updated User Rebecca Baker:
-                  value:
-                    id: 13
-                    firstName: Rebecca
-                    lastName: Baker
-                    email: rebecca@gmail.com
-                    dateOfBirth: '1985-10-02'
-                    emailVerified: false
-                    createDate: '2019-08-24'
-        '404':
-          description: User Not Found
-        '409':
-          description: Email Already Taken
-      description: Update the information of an existing user.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                  description: 'If a new email is given, the user''s email verified property will be set to false.'
-                dateOfBirth:
-                  type: string
-            examples:
-              Update First Name:
-                value:
-                  firstName: Rebecca
-              Update Email:
-                value:
-                  email: rebecca@gmail.com
-              Update Last Name & Date of Birth:
-                value:
-                  lastName: Baker
-                  dateOfBirth: '1985-10-02'
-        description: Patch user properties to update.
-  /user:
+  '/clients/{clientID}/events/{correlationID}/paymentRequests':
     post:
-      summary: Create New User
+      summary: Send a Payment request
       operationId: post-user
       responses:
         '200':
@@ -101,17 +18,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                New User Bob Fellow:
-                  value:
-                    id: 12
-                    firstName: Bob
-                    lastName: Fellow
-                    email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
+                type: string
+              examples: {}
         '400':
           description: Missing Required Information
         '409':
@@ -122,20 +30,8 @@ paths:
             schema:
               type: object
               properties:
-                firstName:
-                  type: string
-                lastName:
-                  type: string
-                email:
-                  type: string
-                dateOfBirth:
-                  type: string
-                  format: date
-              required:
-                - firstName
-                - lastName
-                - email
-                - dateOfBirth
+                '':
+                  $ref: '#/components/schemas/PaymentRequest'
             examples:
               Create User Bob Fellow:
                 value:
@@ -144,7 +40,20 @@ paths:
                   email: bob.fellow@gmail.com
                   dateOfBirth: '1996-08-24'
         description: Post the necessary fields for the API to create a new user.
-      description: Create a new user.
+      description: POST to process a payment request (Post-Pay)
+    parameters:
+      - schema:
+          type: string
+        name: clientID
+        in: path
+        required: true
+        description: '<= 40 characters Client ID is assigned by ICAD Sistemi to each client, and is agreed before communications is possible. This ID is not used for business processing purposes and can be chosen arbitrarily, but could be a merchant ID or terminal ID or other suitable identifier that is already available.'
+      - schema:
+          type: string
+        name: correlationID
+        in: path
+        required: true
+        description: '[ 1 .. 40 ] characters Correlation ID is a mandatory unique identifier assigned by the client to each customer transaction, which in this context means a group of related messages linked to a single customer event, such as an authorisation and a subsequent reversal. This specification does not define how the correlation ID is derived, because suitable method is dependent on the design of the client and source of transactions. Possibilities could be a sequentially incrementing counter (similar to STAN found in ISO 8583 interfaces), a combination of individual fields (e.g. terminal ID and reliable timestamp) or a GUID'
 components:
   schemas:
     Card:
@@ -366,6 +275,8 @@ components:
             id: cwwdhkygntk0w
           description: |
             16 character description.
+        transaction:
+          $ref: '#/components/schemas/Transaction'
       required:
         - card
         - paymentContext
@@ -373,6 +284,7 @@ components:
         - merchant
         - POI
         - saleContext
+        - transaction
     POI:
       title: POI
       x-stoplight:
@@ -511,10 +423,14 @@ components:
           type: string
           x-stoplight:
             id: xhpyajccg3wxy
+          description: |
+            16,5 decimal value
         batchNumber:
           type: string
           x-stoplight:
             id: z92q3hhm9jqd9
+          description: |
+            Batch Number indicates the reconciliation batch to which this transaction is assigned. The batch number is assigned by the API client.
         dateTimeLocal:
           type: string
           x-stoplight:
@@ -523,20 +439,38 @@ components:
           type: array
           x-stoplight:
             id: 1bn9dyatj8dwy
-          items: {}
+          description: |
+            List of the article(s) purchased in this transaction.
+          items:
+            $ref: '#/components/schemas/TransactionLine'
         serviceLevel:
           type: string
           x-stoplight:
             id: gxa9ga6gcvf5a
+          enum:
+            - FULL
+            - SELF
+            - INTERNET
+          description: |
+            Indicates the service rendered at the site, if known and applicable
         transctionID:
           type: string
           x-stoplight:
             id: cktdlqj7hin6u
+          description: |
+            Unique Message Transaction Identifier
         traceNumber:
           type: integer
           x-stoplight:
             id: oet645xruuf3b
+          description: |
+            Trace Number is an API client assigned transaction number. This should be a sequentially incrementing number that is unique to each new message sent.
       required:
+        - transactionAmount
+        - batchNumber
+        - dateTimeLocal
+        - transactionLines
+        - transctionID
         - traceNumber
     TransactionLine:
       title: TransactionLine
@@ -545,21 +479,41 @@ components:
       type: object
       properties:
         trxLineSequenceNumber:
-          type: string
+          type: integer
           x-stoplight:
             id: 47isr5vh96h1e
+          description: |
+            8 digit numeric value
         productCode:
-          type: string
+          type: integer
           x-stoplight:
             id: rsmzw5poies4n
+          description: |-
+            3 digit numeric value
+
+            0 stands for OIL articles, 1 stands for NON OIL articles
         productDescription:
           type: string
           x-stoplight:
             id: afft60iqcy8xl
-        additionalProductDescription:
-          type: string
+          description: |
+            40 character description.
+        additionalProductCode:
+          type: object
           x-stoplight:
             id: 5jh1k9bfnn0or
+          required:
+            - posCodeType
+          properties:
+            posCodeFormat:
+              type: string
+              x-stoplight:
+                id: gbwjq5l3t08xk
+            posCodeType:
+              type: string
+              x-stoplight:
+                id: wurlnui7t4x4f
+              description: 'Article code, <= 14 characters'
         refillingPointID:
           type: string
           x-stoplight:
@@ -572,15 +526,21 @@ components:
           type: number
           x-stoplight:
             id: zxl2ssyo3js64
+          description: |
+            16,5 decimal value
         salesQuantity:
           type: object
           x-stoplight:
             id: u4q6t98bgttdp
+          required:
+            - value
           properties:
             value:
               type: number
               x-stoplight:
                 id: 3ata88uv6m1g0
+              description: |
+                12,5 decimal value
             uom:
               type: string
               x-stoplight:
@@ -589,11 +549,26 @@ components:
           type: number
           x-stoplight:
             id: tnmxuvxl08cmb
+          description: |
+            16,5 decimal value
         taxCode:
           type: string
           x-stoplight:
             id: p6xbe6ums5dgq
+          description: 'tax code applied to the product, <= 1 characters'
         taxAmount:
           type: number
           x-stoplight:
             id: dnh4wt4qg78zd
+          description: |
+            16,5 decimal value
+      required:
+        - trxLineSequenceNumber
+        - productCode
+        - additionalProductCode
+        - unitPrice
+        - salesQuantity
+        - salesAmount
+  securitySchemes:
+    API Key - 1:
+      type: oauth2
