@@ -27,15 +27,252 @@ paths:
                 required:
                   - statusReturn
                   - paymentRequestsResponse
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2019-08-24T14:15:22Z'
+                      result: success
+                      error: ERRCD_OK
+                      message: string
+                    paymentRequestsResponse:
+                      iccDataResponse: string
+                      allowedProducts:
+                        - productCode: 999
+                      originalAmount: string
+                      transactionAmount: string
+                      approvedLimit:
+                        quantity:
+                          value: string
+                          uom: L
+                        amount: string
+                      authorizationCode: string
+                      completionRequired: 'yes'
+                      customerMessage: string
+                      loyaltyRestriction: 'yes'
+                      taxData: string
+                      transactionID: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: failure
+                      error: ERRCD_BADREQUEST
+                      message: Bad request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authentificationError
+                      error: ERRCD_UNAUTHORIZED
+                      message: Credential doesn’t allow operation
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authorizationError
+                      error: ERRCD_FORBIDDEN
+                      message: Request on resource not allowed
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidUrl
+                      error: ERRCD_NOTFOUND
+                      message: URI doesn’t point to any known resource
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidHttpMethod
+                      error: ERRCD_METHODNOTALLOWED
+                      message: HTTP method not allowed
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: failure
+                      error: ERRCD_OTHER
+                      message: Internal Server Error
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                '':
-                  $ref: '#/components/schemas/PaymentRequest'
-            examples: {}
+                card:
+                  $ref: '#/components/schemas/Card'
+                paymentContext:
+                  $ref: '#/components/schemas/PaymentContext'
+                encryptedCustomerData:
+                  type: string
+                  x-stoplight:
+                    id: 732h0nquebxse
+                  description: '[ 6 .. 2048 ] characters'
+                merchant:
+                  $ref: '#/components/schemas/Merchant'
+                POI:
+                  $ref: '#/components/schemas/POI'
+                saleContext:
+                  type: string
+                  x-stoplight:
+                    id: u03ts7ftf6a81
+                  description: |
+                    16 character description.
+                transaction:
+                  $ref: '#/components/schemas/Transaction'
+              required:
+                - card
+                - paymentContext
+                - merchant
+                - POI
+                - saleContext
+                - transaction
+            examples:
+              Example 1:
+                value:
+                  card:
+                    context: MSR
+                    issuerNumber: 0
+                    cardISOType: string
+                    maskedPAN: string
+                    maskingType: string
+                    pinData: string
+                    encryptedSensitiveCardDetailsReq: string
+                  paymentContext:
+                    context: MSR
+                    cardReadMethod: MAGSTRIPE
+                    cardholderAuthEntity: AUTHORISER
+                    cardholderAuthMethod: PIN_OFFLINE_CLEAR
+                    cardholderPresent: PRESENT
+                    fallback: 'yes'
+                    fleetEntryMethod: KEY_ENTRY
+                  encryptedCustomerData: string
+                  merchant:
+                    country: AF
+                    categoryNumber: 4784
+                    merchantID: string
+                    name: string
+                    networkID: string
+                  POI:
+                    siteID: string
+                    address:
+                      - string
+                    POIType: FP
+                    POIID: string
+                    language: abk
+                    readerCapabilities:
+                      cardCapture: 'yes'
+                      cardReading:
+                        - BARCODE
+                      cardWriting:
+                        - EMV
+                      cardholderVerification:
+                        - CDCVM
+                      environment: MERCHANT_ATTENDED
+                      pinLength: 0
+                      cashierDisplayCapabilities: 0
+                      cardholderDisplayCapabilities: 0
+                      cashierPrintCapabilities: 0
+                      cardholderPrintCapabilities: 0
+                    POITraceNumber: string
+                  saleContext: string
+                  transaction:
+                    currency: AED
+                    transactionAmount: string
+                    batchNumber: 0
+                    dateTimeLocal: '2019-08-24T14:15:22Z'
+                    transactionLines:
+                      - trxLineSequenceNumber: 99999999
+                        productCode: 0
+                        productDescription: string
+                        additionalProductCode:
+                          posCodeFormat: upcA
+                          posCodeType: string
+                        refillingPointID: string
+                        pumpLinked: 0
+                        unitPrice: string
+                        salesQuantity:
+                          value: string
+                          uom: L
+                        salesAmount: string
+                        taxCode: s
+                        taxAmount: string
+                    serviceLevel: FULL
+                    transactionID: string
+                    traceNumber: 0
         description: Post the necessary fields for the API to create a new user.
       description: POST to process a payment request (Post-Pay)
     parameters:
@@ -239,49 +476,83 @@ components:
         - cardholderAuthMethod
         - cardholderPresent
         - fallback
-    PaymentRequest:
-      title: PaymentRequest
+    PaymentRequestsResponse:
+      title: PaymentRequestsResponse
       x-stoplight:
-        id: d9a407640a5c3
+        id: k0yjyejt0wo7m
       type: object
-      x-examples:
-        Alice Smith:
-          id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
       properties:
-        card:
-          $ref: '#/components/schemas/Card'
-        paymentContext:
-          $ref: '#/components/schemas/PaymentContext'
-        encryptedCustomerData:
+        iccDataResponse:
           type: string
           x-stoplight:
-            id: 8go5c6tfpbrty
-        merchant:
-          $ref: '#/components/schemas/Merchant'
-        POI:
-          $ref: '#/components/schemas/POI'
-        saleContext:
+            id: g3uhfwdtido1b
+        allowedProducts:
+          type: array
+          x-stoplight:
+            id: itu2w3rob7tpr
+          items:
+            x-stoplight:
+              id: g92xf8vlpjn3n
+            type: object
+            properties:
+              productCode:
+                type: integer
+                x-stoplight:
+                  id: 6d4kr6pdvfn9e
+        originalAmount:
           type: string
           x-stoplight:
-            id: cwwdhkygntk0w
-          description: |
-            16 character description.
-        transaction:
-          $ref: '#/components/schemas/Transaction'
-      required:
-        - card
-        - paymentContext
-        - encryptedCustomerData
-        - merchant
-        - POI
-        - saleContext
-        - transaction
+            id: usawtsktm8w9c
+        transactionAmount:
+          type: string
+          x-stoplight:
+            id: lqg9pzga1d9pk
+        approvedLimit:
+          type: object
+          x-stoplight:
+            id: 7fvsg431n9aa9
+          properties:
+            quantity:
+              type: object
+              x-stoplight:
+                id: db92cfs2hzg3o
+              properties:
+                value:
+                  type: string
+                  x-stoplight:
+                    id: 7z4vxs5jekq04
+                uom:
+                  type: string
+                  x-stoplight:
+                    id: 3l51k8cf3yj4d
+            amount:
+              type: string
+              x-stoplight:
+                id: pkby1vzkwvlgh
+        authorizationCode:
+          type: string
+          x-stoplight:
+            id: g2nvgcphwbwsy
+        completionRequired:
+          type: string
+          x-stoplight:
+            id: ruskygrakl9x6
+        customerMessage:
+          type: string
+          x-stoplight:
+            id: ic1zmlx3uqslb
+        loyaltyRestriction:
+          type: string
+          x-stoplight:
+            id: c60mizpmeqnor
+        taxData:
+          type: string
+          x-stoplight:
+            id: 1s9s2ssctxhz9
+        transactionID:
+          type: string
+          x-stoplight:
+            id: laqa9tgl5ljo1
     POI:
       title: POI
       x-stoplight:
@@ -404,6 +675,35 @@ components:
             id: ll2ux3lexve8h
       required:
         - POIID
+    StatusReturn:
+      title: StatusReturn
+      x-stoplight:
+        id: vrer392o9b3nk
+      type: object
+      properties:
+        timestamp:
+          type: string
+          x-stoplight:
+            id: 1xvr5f6b8169z
+          format: date-time
+        result:
+          type: string
+          x-stoplight:
+            id: yjmtww7nusmvb
+          description: Fixed value "success"
+        error:
+          type: string
+          x-stoplight:
+            id: hfoox5ul16jq0
+          description: Fixed value "ERRCD_OK"
+        message:
+          type: string
+          x-stoplight:
+            id: wventropssrr4
+      required:
+        - timestamp
+        - result
+        - error
     Transaction:
       title: Transaction
       x-stoplight:
@@ -566,112 +866,6 @@ components:
         - unitPrice
         - salesQuantity
         - salesAmount
-    StatusReturn:
-      title: StatusReturn
-      x-stoplight:
-        id: vrer392o9b3nk
-      type: object
-      properties:
-        timestamp:
-          type: string
-          x-stoplight:
-            id: 1xvr5f6b8169z
-          format: date-time
-        result:
-          type: string
-          x-stoplight:
-            id: yjmtww7nusmvb
-          description: Fixed value "success"
-        error:
-          type: string
-          x-stoplight:
-            id: hfoox5ul16jq0
-          description: Fixed value "ERRCD_OK"
-        message:
-          type: string
-          x-stoplight:
-            id: wventropssrr4
-      required:
-        - timestamp
-        - result
-        - error
-    PaymentRequestsResponse:
-      title: PaymentRequestsResponse
-      x-stoplight:
-        id: k0yjyejt0wo7m
-      type: object
-      properties:
-        iccDataResponse:
-          type: string
-          x-stoplight:
-            id: g3uhfwdtido1b
-        allowedProducts:
-          type: array
-          x-stoplight:
-            id: itu2w3rob7tpr
-          items:
-            x-stoplight:
-              id: g92xf8vlpjn3n
-            type: object
-            properties:
-              productCode:
-                type: integer
-                x-stoplight:
-                  id: 6d4kr6pdvfn9e
-        originalAmount:
-          type: string
-          x-stoplight:
-            id: usawtsktm8w9c
-        transactionAmount:
-          type: string
-          x-stoplight:
-            id: lqg9pzga1d9pk
-        approvedLimit:
-          type: object
-          x-stoplight:
-            id: 7fvsg431n9aa9
-          properties:
-            quantity:
-              type: object
-              x-stoplight:
-                id: db92cfs2hzg3o
-              properties:
-                value:
-                  type: string
-                  x-stoplight:
-                    id: 7z4vxs5jekq04
-                uom:
-                  type: string
-                  x-stoplight:
-                    id: 3l51k8cf3yj4d
-            amount:
-              type: string
-              x-stoplight:
-                id: pkby1vzkwvlgh
-        authorizationCode:
-          type: string
-          x-stoplight:
-            id: g2nvgcphwbwsy
-        completionRequired:
-          type: string
-          x-stoplight:
-            id: ruskygrakl9x6
-        customerMessage:
-          type: string
-          x-stoplight:
-            id: ic1zmlx3uqslb
-        loyaltyRestriction:
-          type: string
-          x-stoplight:
-            id: c60mizpmeqnor
-        taxData:
-          type: string
-          x-stoplight:
-            id: 1s9s2ssctxhz9
-        transactionID:
-          type: string
-          x-stoplight:
-            id: laqa9tgl5ljo1
   securitySchemes:
     API Key - 1:
       type: oauth2
