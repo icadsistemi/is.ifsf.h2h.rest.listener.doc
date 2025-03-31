@@ -4,7 +4,72 @@ x-stoplight:
 info:
   title: is.ifsf.h2h.rest.listener.doc
   version: 0.0.1
-  description: ''
+  description: |-
+    # Merchant Initiated Host to Host API
+
+    The HTTP status codes returned by the endpoints follow these rules:
+    - If the flow is correct, returns positive response code
+    - If the flow is incorrect, returns negative response code 
+    - If the flow breaks for some reason (DB connection, malformed input, etc..), returns negative response
+
+
+    # Enums
+    ### Product Codes
+
+    <table>
+    <tr>
+        <td>Code</td>
+        <td>Product Name</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>Diesel</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Super</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>Premium Diesel</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>Premium Super</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>Methane</td>
+    </tr>
+    <tr>
+        <td>6</td>
+        <td>LPG</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>Artic Diesel</td>
+    </tr>
+    <tr>
+        <td>8</td>
+        <td>AdBlue</td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td>LNG</td>
+    </tr>
+    <tr>
+        <td>17</td>
+        <td>HVO</td>
+    </tr>
+    <tr>
+        <td>18</td>
+        <td>L-GNC</td>
+    </tr>
+    <tr>
+        <td>999</td>
+        <td>Non Oil</td>
+    </tr>
+    </table>
 servers:
   - url: 'http://localhost:3000'
 paths:
@@ -788,7 +853,7 @@ components:
           description: |-
             3 digit numeric value
 
-            0 stands for OIL articles, 1 stands for NON OIL articles
+            Use the code provided at the beginning of this document. If the value is 999 (non oil items), additionalProductCode must be set too
         productDescription:
           type: string
           x-stoplight:
@@ -810,7 +875,9 @@ components:
               type: string
               x-stoplight:
                 id: wurlnui7t4x4f
-              description: 'Article code, <= 14 characters'
+              description: |-
+                Article code, <= 14 characters
+                Used only for non oil items
         refillingPointID:
           type: string
           x-stoplight:
