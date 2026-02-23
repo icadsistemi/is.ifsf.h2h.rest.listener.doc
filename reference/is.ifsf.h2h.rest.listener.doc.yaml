@@ -293,19 +293,15 @@ paths:
                     networkID: string
                   POI:
                     siteID: string
-                    address:
-                      - string
+                    address: string
                     POIType: FP
                     POIID: string
                     language: abk
                     readerCapabilities:
                       cardCapture: 'yes'
-                      cardReading:
-                        - BARCODE
-                      cardWriting:
-                        - EMV
-                      cardholderVerification:
-                        - CDCVM
+                      cardReading: BARCODE
+                      cardWriting: EMV
+                      cardholderVerification: CDCVM
                       environment: MERCHANT_ATTENDED
                       pinLength: 0
                       cashierDisplayCapabilities: 0
@@ -440,7 +436,7 @@ components:
           description: |
             ISO-3166 / UN/ECE REC 09 Codes
         categoryNumber:
-          type: string
+          type: number
           x-stoplight:
             id: ljcozl76c4hxm
           description: |
@@ -788,7 +784,7 @@ components:
           description: |
             16,5 decimal value
         batchNumber:
-          type: string
+          type: number
           x-stoplight:
             id: z92q3hhm9jqd9
           description: |
@@ -815,7 +811,7 @@ components:
             - INTERNET
           description: |
             Indicates the service rendered at the site, if known and applicable
-        transctionID:
+        transactionID:
           type: string
           x-stoplight:
             id: cktdlqj7hin6u
@@ -832,7 +828,7 @@ components:
         - batchNumber
         - dateTimeLocal
         - transactionLines
-        - transctionID
+        - transactionID
         - traceNumber
     TransactionLine:
       title: TransactionLine
@@ -883,11 +879,11 @@ components:
           x-stoplight:
             id: 4l8sk16xt3mpr
         pumpLinked:
-          type: string
+          type: number
           x-stoplight:
             id: fb1vem75xs4lt
         unitPrice:
-          type: number
+          type: string
           x-stoplight:
             id: zxl2ssyo3js64
           description: |
@@ -900,7 +896,7 @@ components:
             - value
           properties:
             value:
-              type: number
+              type: string
               x-stoplight:
                 id: 3ata88uv6m1g0
               description: |
@@ -910,7 +906,7 @@ components:
               x-stoplight:
                 id: 9jjn9k7rkcc13
         salesAmount:
-          type: number
+          type: string
           x-stoplight:
             id: tnmxuvxl08cmb
           description: |
@@ -921,7 +917,7 @@ components:
             id: p6xbe6ums5dgq
           description: 'tax code applied to the product, <= 1 characters'
         taxAmount:
-          type: number
+          type: string
           x-stoplight:
             id: dnh4wt4qg78zd
           description: |
