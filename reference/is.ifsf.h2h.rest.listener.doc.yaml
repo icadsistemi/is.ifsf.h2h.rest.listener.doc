@@ -398,7 +398,7 @@ components:
               "PAN": "string"
             }
         issuerNumber:
-          type: string
+          type: integer
           x-stoplight:
             id: xkskvimjkuiyj
           description: |
