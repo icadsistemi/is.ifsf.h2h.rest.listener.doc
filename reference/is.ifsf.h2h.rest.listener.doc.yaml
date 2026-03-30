@@ -258,6 +258,8 @@ paths:
                     16 character description.
                 transaction:
                   $ref: '#/components/schemas/Transaction'
+                receipt:
+                  $ref: '#/components/schemas/Receipt'
               required:
                 - card
                 - paymentContext
@@ -336,6 +338,284 @@ paths:
                     traceNumber: 0
         description: Post the necessary fields for the API to create a new user.
       description: POST to process a payment request (Post-Pay)
+    parameters:
+      - schema:
+          type: string
+        name: clientID
+        in: path
+        required: true
+        description: '<= 40 characters Client ID is assigned by ICAD Sistemi to each client, and is agreed before communications is possible. This ID is not used for business processing purposes and can be chosen arbitrarily, but could be a merchant ID or terminal ID or other suitable identifier that is already available.'
+      - schema:
+          type: string
+        name: correlationID
+        in: path
+        required: true
+        description: '[ 1 .. 40 ] characters Correlation ID is a mandatory unique identifier assigned by the client to each customer transaction, which in this context means a group of related messages linked to a single customer event, such as an authorisation and a subsequent reversal. This specification does not define how the correlation ID is derived, because suitable method is dependent on the design of the client and source of transactions. Possibilities could be a sequentially incrementing counter (similar to STAN found in ISO 8583 interfaces), a combination of individual fields (e.g. terminal ID and reliable timestamp) or a GUID'
+  '/clients/{clientID}/events/{correlationID}/preAuthorizationRequests':
+    post:
+      summary: Send a Preauthorization request
+      operationId: post-user
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                  paymentRequestsResponse:
+                    $ref: '#/components/schemas/PaymentRequestsResponse'
+                required:
+                  - statusReturn
+                  - paymentRequestsResponse
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2019-08-24T14:15:22Z'
+                      result: success
+                      error: ERRCD_OK
+                      message: string
+                    paymentRequestsResponse:
+                      iccDataResponse: string
+                      allowedProducts:
+                        - productCode: 999
+                      originalAmount: string
+                      transactionAmount: string
+                      approvedLimit:
+                        quantity:
+                          value: string
+                          uom: L
+                        amount: string
+                      authorizationCode: string
+                      completionRequired: 'yes'
+                      customerMessage: string
+                      loyaltyRestriction: 'yes'
+                      taxData: string
+                      transactionID: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: failure
+                      error: ERRCD_BADREQUEST
+                      message: Bad request
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authentificationError
+                      error: ERRCD_UNAUTHORIZED
+                      message: Credential doesn’t allow operation
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authorizationError
+                      error: ERRCD_FORBIDDEN
+                      message: Request on resource not allowed
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidUrl
+                      error: ERRCD_NOTFOUND
+                      message: URI doesn’t point to any known resource
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidHttpMethod
+                      error: ERRCD_METHODNOTALLOWED
+                      message: HTTP method not allowed
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: failure
+                      error: ERRCD_OTHER
+                      message: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card:
+                  $ref: '#/components/schemas/Card'
+                paymentContext:
+                  $ref: '#/components/schemas/PaymentContext'
+                encryptedCustomerData:
+                  type: string
+                  x-stoplight:
+                    id: 732h0nquebxse
+                  description: '[ 6 .. 2048 ] characters'
+                merchant:
+                  $ref: '#/components/schemas/Merchant'
+                POI:
+                  $ref: '#/components/schemas/POI'
+                saleContext:
+                  type: string
+                  x-stoplight:
+                    id: u03ts7ftf6a81
+                  description: |
+                    16 character description.
+                transaction:
+                  $ref: '#/components/schemas/Transaction'
+                receipt:
+                  $ref: '#/components/schemas/Receipt'
+              required:
+                - card
+                - paymentContext
+                - merchant
+                - POI
+                - saleContext
+                - transaction
+            examples:
+              Example 1:
+                value:
+                  card:
+                    context: MSR
+                    issuerNumber: 0
+                    cardISOType: string
+                    maskedPAN: string
+                    maskingType: string
+                    pinData: string
+                    encryptedSensitiveCardDetailsReq: string
+                  paymentContext:
+                    context: MSR
+                    cardReadMethod: MAGSTRIPE
+                    cardholderAuthEntity: AUTHORISER
+                    cardholderAuthMethod: PIN_OFFLINE_CLEAR
+                    cardholderPresent: PRESENT
+                    fallback: 'yes'
+                    fleetEntryMethod: KEY_ENTRY
+                  encryptedCustomerData: string
+                  merchant:
+                    country: AF
+                    categoryNumber: 4784
+                    merchantID: string
+                    name: string
+                    networkID: string
+                  POI:
+                    siteID: string
+                    address: string
+                    POIType: FP
+                    POIID: string
+                    language: abk
+                    readerCapabilities:
+                      cardCapture: 'yes'
+                      cardReading: BARCODE
+                      cardWriting: EMV
+                      cardholderVerification: CDCVM
+                      environment: MERCHANT_ATTENDED
+                      pinLength: 0
+                      cashierDisplayCapabilities: 0
+                      cardholderDisplayCapabilities: 0
+                      cashierPrintCapabilities: 0
+                      cardholderPrintCapabilities: 0
+                    POITraceNumber: string
+                  saleContext: string
+                  transaction:
+                    currency: AED
+                    transactionAmount: string
+                    batchNumber: 0
+                    dateTimeLocal: '2019-08-24T14:15:22Z'
+                    transactionLines:
+                      - trxLineSequenceNumber: 99999999
+                        productCode: 0
+                        productDescription: string
+                        additionalProductCode:
+                          posCodeFormat: upcA
+                          posCodeType: string
+                        refillingPointID: string
+                        pumpLinked: 0
+                        unitPrice: string
+                        salesQuantity:
+                          value: string
+                          uom: L
+                        salesAmount: string
+                        taxCode: s
+                        taxAmount: string
+                    serviceLevel: FULL
+                    transactionID: string
+                    traceNumber: 0
+        description: Post the necessary fields for the API to create a new user.
+      description: POST to process a preauthorization request (Post-Pay)
     parameters:
       - schema:
           type: string
@@ -929,6 +1209,16 @@ components:
         - unitPrice
         - salesQuantity
         - salesAmount
+    Receipt:
+      title: Receipt
+      x-stoplight:
+        id: o1b8t9av0q0ia
+      type: object
+      properties:
+        deliveryNoteID:
+          type: string
+          x-stoplight:
+            id: pnynetzgvxkwz
   securitySchemes:
     API Key - 1:
       type: oauth2
