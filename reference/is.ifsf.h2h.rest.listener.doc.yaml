@@ -70,6 +70,42 @@ info:
         <td>Non Oil</td>
     </tr>
     </table>
+
+    Decline Reasons
+    <table>
+    <tr>
+    <td><b>Value</b></td>
+    <td><b>Description</b></td>
+    </tr>
+    <tr>
+    <td>AMOUNT_INVALID</td>
+    <td>The input amount is not valid</td>
+    </tr>
+    <tr>
+    <td>ARQC_INVALID</td>
+    <td>Failed ARQC (EMV) validation</td>
+    </tr>
+    <tr>
+    <td>INSUFFICIENT_FUNDS</td>
+    <td>Card insufficient fund</td>
+    </tr>
+    <tr>
+    <td>MERCHANT_INVALID</td>
+    <td>Fuelstation not found.</td>
+    </tr>
+    <tr>
+    <td>PIN_INVALID</td>
+    <td>Invalid Pin</td>
+    </tr>
+    <tr>
+    <td>PIN_INVALID_TRIES_EXCEEDED</td>
+    <td>Maximum number of PIN attempts exceeded</td>
+    </tr>
+    <tr>
+    <td>PRODUCT_DISALLOWED</td>
+    <td>Product code not enabled</td>
+    </tr>
+    </table>
 servers:
   - url: 'http://localhost:3000'
 paths:
@@ -338,6 +374,262 @@ paths:
                     traceNumber: 0
         description: Post the necessary fields for the API to create a new user.
       description: POST to process a payment request (Post-Pay)
+    parameters:
+      - schema:
+          type: string
+        name: clientID
+        in: path
+        required: true
+        description: '<= 40 characters Client ID is assigned by ICAD Sistemi to each client, and is agreed before communications is possible. This ID is not used for business processing purposes and can be chosen arbitrarily, but could be a merchant ID or terminal ID or other suitable identifier that is already available.'
+      - schema:
+          type: string
+        name: correlationID
+        in: path
+        required: true
+        description: '[ 1 .. 40 ] characters Correlation ID is a mandatory unique identifier assigned by the client to each customer transaction, which in this context means a group of related messages linked to a single customer event, such as an authorisation and a subsequent reversal. This specification does not define how the correlation ID is derived, because suitable method is dependent on the design of the client and source of transactions. Possibilities could be a sequentially incrementing counter (similar to STAN found in ISO 8583 interfaces), a combination of individual fields (e.g. terminal ID and reliable timestamp) or a GUID'
+  '/clients/{clientID}/events/{correlationID}/paymentReversalAdvice':
+    post:
+      summary: Send a Payment reversal advice
+      operationId: post-payment-reversal
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                  paymentReversalAdviceResponse:
+                    $ref: '#/components/schemas/PaymentReversalAdvicesResponse'
+                required:
+                  - statusReturn
+                  - paymentReversalAdviceResponse
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2019-08-24T14:15:22Z'
+                      result: success
+                      error: ERRCD_OK
+                      message: string
+                    paymentRequestsResponse:
+                      iccDataResponse: string
+                      allowedProducts:
+                        - productCode: 999
+                      originalAmount: string
+                      transactionAmount: string
+                      approvedLimit:
+                        quantity:
+                          value: string
+                          uom: L
+                        amount: string
+                      authorizationCode: string
+                      completionRequired: 'yes'
+                      customerMessage: string
+                      loyaltyRestriction: 'yes'
+                      taxData: string
+                      transactionID: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authentificationError
+                      error: ERRCD_UNAUTHORIZED
+                      message: Credential doesn’t allow operation
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: authorizationError
+                      error: ERRCD_FORBIDDEN
+                      message: Request on resource not allowed
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidUrl
+                      error: ERRCD_NOTFOUND
+                      message: URI doesn’t point to any known resource
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: invalidHttpMethod
+                      error: ERRCD_METHODNOTALLOWED
+                      message: HTTP method not allowed
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusReturn:
+                    $ref: '#/components/schemas/StatusReturn'
+                required:
+                  - statusReturn
+              examples:
+                Example 1:
+                  value:
+                    statusReturn:
+                      timestamp: '2009-11-20T17:30:50'
+                      result: failure
+                      error: ERRCD_OTHER
+                      message: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Indicates why the advice is sent
+              properties:
+                adviceReason:
+                  type: string
+                  x-stoplight:
+                    id: x9uch5qx3yg6r
+                card:
+                  $ref: '#/components/schemas/Card'
+                merchant:
+                  $ref: '#/components/schemas/Merchant'
+                POI:
+                  $ref: '#/components/schemas/POI'
+                saleContext:
+                  type: string
+                  x-stoplight:
+                    id: u03ts7ftf6a81
+                  description: |
+                    16 character description.
+                transaction:
+                  $ref: '#/components/schemas/TransactionReversal'
+                receipt:
+                  $ref: '#/components/schemas/Receipt'
+              required:
+                - card
+                - merchant
+                - POI
+                - saleContext
+                - transaction
+            examples:
+              Example 1:
+                value:
+                  card:
+                    context: MSR
+                    issuerNumber: 0
+                    cardISOType: string
+                    maskedPAN: string
+                    maskingType: string
+                    pinData: string
+                    encryptedSensitiveCardDetailsReq: string
+                  paymentContext:
+                    context: MSR
+                    cardReadMethod: MAGSTRIPE
+                    cardholderAuthEntity: AUTHORISER
+                    cardholderAuthMethod: PIN_OFFLINE_CLEAR
+                    cardholderPresent: PRESENT
+                    fallback: 'yes'
+                    fleetEntryMethod: KEY_ENTRY
+                  encryptedCustomerData: string
+                  merchant:
+                    country: AF
+                    categoryNumber: 4784
+                    merchantID: string
+                    name: string
+                    networkID: string
+                  POI:
+                    siteID: string
+                    address: string
+                    POIType: FP
+                    POIID: string
+                    language: abk
+                    readerCapabilities:
+                      cardCapture: 'yes'
+                      cardReading: BARCODE
+                      cardWriting: EMV
+                      cardholderVerification: CDCVM
+                      environment: MERCHANT_ATTENDED
+                      pinLength: 0
+                      cashierDisplayCapabilities: 0
+                      cardholderDisplayCapabilities: 0
+                      cashierPrintCapabilities: 0
+                      cardholderPrintCapabilities: 0
+                    POITraceNumber: string
+                  saleContext: string
+                  transaction:
+                    currency: AED
+                    transactionAmount: string
+                    batchNumber: 0
+                    dateTimeLocal: '2019-08-24T14:15:22Z'
+                    transactionLines:
+                      - trxLineSequenceNumber: 99999999
+                        productCode: 0
+                        productDescription: string
+                        additionalProductCode:
+                          posCodeFormat: upcA
+                          posCodeType: string
+                        refillingPointID: string
+                        pumpLinked: 0
+                        unitPrice: string
+                        salesQuantity:
+                          value: string
+                          uom: L
+                        salesAmount: string
+                        taxCode: s
+                        taxAmount: string
+                    serviceLevel: FULL
+                    transactionID: string
+                    traceNumber: 0
+        description: ''
+      description: POST to process a payment reversal advice
     parameters:
       - schema:
           type: string
@@ -631,6 +923,29 @@ paths:
         description: '[ 1 .. 40 ] characters Correlation ID is a mandatory unique identifier assigned by the client to each customer transaction, which in this context means a group of related messages linked to a single customer event, such as an authorisation and a subsequent reversal. This specification does not define how the correlation ID is derived, because suitable method is dependent on the design of the client and source of transactions. Possibilities could be a sequentially incrementing counter (similar to STAN found in ISO 8583 interfaces), a combination of individual fields (e.g. terminal ID and reliable timestamp) or a GUID'
 components:
   schemas:
+    ApprovedLimit:
+      title: ApprovedLimit
+      x-stoplight:
+        id: h4o1x67x4eu61
+      type: object
+      properties:
+        quantity:
+          type: object
+          x-stoplight:
+            id: 0cdrz869rxydd
+          properties:
+            value:
+              type: string
+              x-stoplight:
+                id: vuns7i40l5dil
+            uom:
+              type: string
+              x-stoplight:
+                id: vl6fqbis93toe
+        amount:
+          type: string
+          x-stoplight:
+            id: 4llgadj0nrnmn
     Card:
       title: Card
       x-stoplight:
@@ -849,27 +1164,7 @@ components:
           x-stoplight:
             id: lqg9pzga1d9pk
         approvedLimit:
-          type: object
-          x-stoplight:
-            id: 7fvsg431n9aa9
-          properties:
-            quantity:
-              type: object
-              x-stoplight:
-                id: db92cfs2hzg3o
-              properties:
-                value:
-                  type: string
-                  x-stoplight:
-                    id: 7z4vxs5jekq04
-                uom:
-                  type: string
-                  x-stoplight:
-                    id: 3l51k8cf3yj4d
-            amount:
-              type: string
-              x-stoplight:
-                id: pkby1vzkwvlgh
+          $ref: '#/components/schemas/ApprovedLimit'
         authorizationCode:
           type: string
           x-stoplight:
@@ -894,6 +1189,60 @@ components:
           type: string
           x-stoplight:
             id: laqa9tgl5ljo1
+    PaymentReversalAdvicesFailureResponse:
+      title: PaymentReversalAdvicesFailureResponse
+      x-stoplight:
+        id: bo4kn5jsfowm2
+      type: object
+      description: Returned when the reversal fails.
+      properties:
+        declineReason:
+          type: string
+          x-stoplight:
+            id: wp16zb31g2baf
+          description: See enum Decline Reasons.
+        customerMessage:
+          type: string
+          x-stoplight:
+            id: l2zkhgn2284k1
+        transactionID:
+          type: string
+          x-stoplight:
+            id: 8es0twtfxnvy0
+    PaymentReversalAdvicesResponse:
+      title: PaymentReversalAdvicesResponse
+      x-stoplight:
+        id: y7t53hvt43fw1
+      type: object
+      properties:
+        iccDataResponse:
+          type: string
+          x-stoplight:
+            id: u7dx9iqagybu3
+        transactionAmount:
+          type: string
+          x-stoplight:
+            id: 8vkcvo9jv7n69
+        approvedLimit:
+          $ref: '#/components/schemas/ApprovedLimit'
+        authorizationCode:
+          type: string
+          x-stoplight:
+            id: 6i9yisrnubf9o
+        customerMessage:
+          type: string
+          x-stoplight:
+            id: k8cxuwnsftgjb
+        originalFound:
+          type: string
+          x-stoplight:
+            id: bnicc1v5fhbb7
+          description: 'Can have only two values: "yes", "no".'
+        transactionID:
+          type: string
+          x-stoplight:
+            id: jsk0dhvhmrqgu
+      description: Returned only when the reversal is completed successfully.
     POI:
       title: POI
       x-stoplight:
@@ -1049,6 +1398,71 @@ components:
       title: Transaction
       x-stoplight:
         id: d1spy52xf60vf
+      type: object
+      properties:
+        currency:
+          type: string
+          x-stoplight:
+            id: hv6ul2r6rgz3s
+          description: |
+            ISO-4217 / UN/ECE REC 09 Codes
+        transactionAmount:
+          type: string
+          x-stoplight:
+            id: xhpyajccg3wxy
+          description: |
+            16,5 decimal value
+        batchNumber:
+          type: number
+          x-stoplight:
+            id: z92q3hhm9jqd9
+          description: |
+            Batch Number indicates the reconciliation batch to which this transaction is assigned. The batch number is assigned by the API client.
+        dateTimeLocal:
+          type: string
+          x-stoplight:
+            id: prih5emzqnxbv
+        transactionLines:
+          type: array
+          x-stoplight:
+            id: 1bn9dyatj8dwy
+          description: |
+            List of the article(s) purchased in this transaction.
+          items:
+            $ref: '#/components/schemas/TransactionLine'
+        serviceLevel:
+          type: string
+          x-stoplight:
+            id: gxa9ga6gcvf5a
+          enum:
+            - FULL
+            - SELF
+            - INTERNET
+          description: |
+            Indicates the service rendered at the site, if known and applicable
+        transactionID:
+          type: string
+          x-stoplight:
+            id: cktdlqj7hin6u
+          description: |
+            Unique Message Transaction Identifier
+        traceNumber:
+          type: integer
+          x-stoplight:
+            id: oet645xruuf3b
+          description: |
+            Trace Number is an API client assigned transaction number. This should be a sequentially incrementing number that is unique to each new message sent.
+      required:
+        - transactionAmount
+        - batchNumber
+        - dateTimeLocal
+        - transactionLines
+        - transactionID
+        - traceNumber
+    TransactionReversal:
+      title: TransactionReversal
+      x-stoplight:
+        id: odsxgkvn4ityv
       type: object
       properties:
         currency:
